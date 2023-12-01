@@ -1,11 +1,49 @@
-const task = {
-	task: "Preparar la reunión",
-	task: "Organizar la presentación",
-	task: "Cancelar el viaje",
-	task: "Pagar las facturas",
-	task: "Organizar la presentación",
-	task: "Organizar la presentación",
-	task: "Organizar la presentación",
-	task: "Archivar las facturas",
-	task: "Encargar material de oficina",
-}
+
+
+import { createStore } from 'vuex'
+
+export default createStore({
+	state() {
+		return {
+			tasks: [
+				{ completed: true, name: "Preparar la reunión" },
+				{ completed: false, name: "Organizar la presentación" },
+				{ completed: true, name: "Cancelar el viaje" },
+				{ completed: false, name: "Pagar las facturas" },
+				{ completed: false, name: "Archivar las facturas" },
+				{ completed: false, name: "Encargar material de oficina" },
+			]
+		}
+	},
+	mutations: {
+		setMessage(state, newMessage) {
+			state.message = newMessage
+		},
+		addTask(state, newTask) {
+			state.tasks.unshift({
+				completed: false,
+				name: newTask,
+			});
+		},
+		completeTask(state, indexTask) {
+			state.tasks[indexTask].completed = true;
+		},
+		removeTask(state, index) {
+			state.tasks.splice(index, 1);
+		},
+		removeAllTask(state) {
+			state.tasks = []
+		},
+		removeCompletedTask(state) {
+			state.tasks = state.tasks.filter((item) => !item.completed);
+		},
+	},
+	getters: {
+		completedTasks(state) {
+			return state.tasks.filter((item) => item.completed).length
+		},
+		pendingTasks(state) {
+			return state.tasks.filter((item) => !item.completed).length
+		}
+	}
+})

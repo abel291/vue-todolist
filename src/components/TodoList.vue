@@ -1,66 +1,43 @@
 <script setup>
 import { ref, computed } from "vue";
 import Button from "./Button.vue";
+import { useStore } from 'vuex'
 
-const tasks = ref([
-	{ completed: true, name: "Preparar la reunión" },
-	{ completed: false, name: "Organizar la presentación" },
-	{ completed: true, name: "Cancelar el viaje" },
-	{ completed: false, name: "Pagar las facturas" },
-	{ completed: false, name: "Archivar las facturas" },
-	{ completed: false, name: "Encargar material de oficina" },
-]);
+
+const store = useStore()
+
+const tasks = computed(() => store.state.tasks)
+const completedTasks = computed(() => store.getters.completedTasks)
+const pendingTasks = computed(() => store.getters.pendingTasks)
 
 const newTask = ref("");
-const addTask = () => {
+const handleSubmitAddTask = () => {
 	if (newTask.value) {
-		tasks.value.unshift({
-			completed: false,
-			name: newTask.value,
-		});
-		newTask.value = "";
+		store.commit('addTask', newTask.value)
 	}
 	newTask.value = "";
 };
 
-const handleButtonCompleteTaks = (index) => {
-	// tasks.value = tasks.value.map((item) => {
-	// 	if (item.id == id) {
-	// 		item.completed = true
-	// 	}
-	// 	return item
-	// })
-	tasks.value[index].completed = true;
+const handleButtonCompleteTask = (index) => {
+	store.commit('completeTask', index)
 };
 
-const handleButtonRemoveTaks = (index) => {
-	tasks.value.splice(index, 1);
+const handleButtonRemoveTask = (index) => {
+	store.commit('removeTask', index)
 };
-const handleButtonRemoveAllTaks = () => {
-	tasks.value = [];
-};
-const handleButtonRemoveCompletedTaks = () => {
-	tasks.value = tasks.value.filter((item) => !item.completed);
-};
+const handleButtonRemoveAllTask = () => {
+	store.commit('removeAllTask')
 
-const completedTasks = computed({
-	// getter
-	get() {
-		return tasks.value.filter((item) => item.completed).length;
-	},
-});
-const pendingTasks = computed({
-	// getter
-	get() {
-		return tasks.value.filter((item) => !item.completed).length;
-	},
-});
+};
+const handleButtonRemoveCompletedTask = () => {
+	store.commit('removeCompletedTask')
+};
 </script>
 <template lang="">
     <div class="bg-white overflow-hidden rounded-lg shadow w-full max-w-lg">
         <div class="p-6 text-neutral-800">
             <h1 class="font-medium text-lg text-center">Todo List</h1>
-            <form class="my-8 flex items-center" @submit.prevent="addTask">
+            <form class="my-8 flex items-center" @submit.prevent="handleSubmitAddTask">
                 <input
                     v-model="newTask"
                     type="text"
@@ -78,13 +55,13 @@ const pendingTasks = computed({
                             <span v-bind:class="{'line-through': item.completed}">{{ item.name }}</span>
                             <div class="flex items-center gap-2">
                                 <button
-                                    @click="handleButtonCompleteTaks(index)"
+                                    @click="handleButtonCompleteTask(index)"
                                     :class="[item.completed ? 'text-gray-300' : 'text-blue-500 hover:font-medium']"
                                     :disabled="item.completed"
                                 >
                                     Completada
                                 </button>
-                                <button title="Borrar" @click="handleButtonRemoveTaks(index)" class="text-red-500 hover:font-medium">
+                                <button title="Borrar" @click="handleButtonRemoveTask(index)" class="text-red-500 hover:font-medium">
                                     Borrar
                                 </button>
                             </div>
@@ -94,8 +71,8 @@ const pendingTasks = computed({
             </div>
             <div class="mt-8">
                 <div class="flex justify-stretch gap-x-4">
-                    <Button @click="handleButtonRemoveCompletedTaks" :disabled="!completedTasks" class="w-full md:w-1/2">Limpiar completadas</Button>
-                    <Button @click="handleButtonRemoveAllTaks" :disabled="!tasks.length" class="w-full md:w-1/2">Limpiar todas</Button>
+                    <Button @click="handleButtonRemoveCompletedTask" :disabled="!completedTasks" class="w-full md:w-1/2">Limpiar completadas</Button>
+                    <Button @click="handleButtonRemoveAllTask" :disabled="!tasks.length" class="w-full md:w-1/2">Limpiar todas</Button>
                 </div>
             </div>
             <div class="mt-6">
@@ -106,4 +83,3 @@ const pendingTasks = computed({
     </div>
 </template>
 
-<style lang=""></style>

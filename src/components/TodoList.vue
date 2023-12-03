@@ -1,36 +1,38 @@
-<script setup>
-import { ref, computed } from "vue";
+<script>
+import {ref, computed} from "vue";
 import Button from "./Button.vue";
-import { useStore } from 'vuex'
+import OptionTaskButtons from "./OptionTaskButtons.vue";
+import ClearButtons from "./ClearButtons.vue";
+import TaskStatistics from "./TaskStatistics.vue";
+import {mapState} from "vuex";
 
-
-const store = useStore()
-
-const tasks = computed(() => store.state.tasks)
-const completedTasks = computed(() => store.getters.completedTasks)
-const pendingTasks = computed(() => store.getters.pendingTasks)
-
-const newTask = ref("");
-const handleSubmitAddTask = () => {
-	if (newTask.value) {
-		store.commit('addTask', newTask.value)
-	}
-	newTask.value = "";
-};
-
-const handleButtonCompleteTask = (index) => {
-	store.commit('completeTask', index)
-};
-
-const handleButtonRemoveTask = (index) => {
-	store.commit('removeTask', index)
-};
-const handleButtonRemoveAllTask = () => {
-	store.commit('removeAllTask')
-
-};
-const handleButtonRemoveCompletedTask = () => {
-	store.commit('removeCompletedTask')
+export default {
+    components: {
+        Button,
+        OptionTaskButtons,
+        ClearButtons,
+        TaskStatistics,
+    },
+    data() {
+        return {
+            newTask: "",
+        };
+    },
+    computed: mapState(["tasks"]),
+    methods: {
+        // ...mapMutations([
+        // 	'completeTask',
+        // 	'removeTask',
+        // 	'removeAllTask',
+        // 	'removeCompletedTask',
+        // ]),
+        handleSubmitAddTask() {
+            if (this.newTask) {
+                this.$store.commit("addTask", this.newTask);
+            }
+            this.newTask = "";
+        },
+    },
 };
 </script>
 <template lang="">
@@ -53,33 +55,17 @@ const handleButtonRemoveCompletedTask = () => {
                     <div v-for="(item, index) in tasks" :key="index">
                         <div class="flex justify-between max-w-fdivl">
                             <span v-bind:class="{'line-through': item.completed}">{{ item.name }}</span>
-                            <div class="flex items-center gap-2">
-                                <button
-                                    @click="handleButtonCompleteTask(index)"
-                                    :class="[item.completed ? 'text-gray-300' : 'text-blue-500 hover:font-medium']"
-                                    :disabled="item.completed"
-                                >
-                                    Completada
-                                </button>
-                                <button title="Borrar" @click="handleButtonRemoveTask(index)" class="text-red-500 hover:font-medium">
-                                    Borrar
-                                </button>
-                            </div>
+                            <OptionTaskButtons :task="item" :task-key="index" />
                         </div>
                     </div>
                 </div>
             </div>
             <div class="mt-8">
-                <div class="flex justify-stretch gap-x-4">
-                    <Button @click="handleButtonRemoveCompletedTask" :disabled="!completedTasks" class="w-full md:w-1/2">Limpiar completadas</Button>
-                    <Button @click="handleButtonRemoveAllTask" :disabled="!tasks.length" class="w-full md:w-1/2">Limpiar todas</Button>
-                </div>
+                <ClearButtons />
             </div>
             <div class="mt-6">
-                <div class="text-sm font-medium text-red-500">Tareas pendiente: {{ pendingTasks }}</div>
-                <div class="text-sm font-medium text-green-500 mt-1">Tareas Completadas: {{ completedTasks }}</div>
+                <TaskStatistics />
             </div>
         </div>
     </div>
 </template>
-

@@ -16,9 +16,6 @@ export default createStore({
 		}
 	},
 	mutations: {
-		setMessage(state, newMessage) {
-			state.message = newMessage
-		},
 		addTask(state, newTask) {
 			state.tasks.unshift({
 				completed: false,
